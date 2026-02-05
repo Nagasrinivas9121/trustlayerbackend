@@ -23,7 +23,6 @@ app.use("/api/", apiLimiter);
 app.use("/api/auth", authLimiter);
 
 // ================= AUDIT LOGGING =================
-// (Applied only to sensitive routes)
 app.use("/api/admin", audit);
 app.use("/api/services", audit);
 app.use("/api/enrollments", audit);
@@ -37,14 +36,25 @@ app.use("/api/admin", require("./routes/admin.routes"));
 
 // ================= HEALTH CHECK =================
 app.get("/", (req, res) => {
-  res.send("Trustlayer Labs API running");
+  res.status(200).send("✅ Trustlayer Labs API running");
 });
 
 // ================= START SERVER =================
 const PORT = process.env.PORT || 5000;
 
-sequelize.sync().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Trustlayer Labs backend running on port ${PORT}`);
-  });
-});
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("✅ Database connected");
+
+    await sequelize.sync();
+    console.log("✅ Models synced");
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Trustlayer Labs backend running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("❌ Unable to start server:", error);
+    process.exit(1);
+  }
+})();
