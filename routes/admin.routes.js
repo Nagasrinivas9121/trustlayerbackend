@@ -71,4 +71,11 @@ router.put("/services/:id", auth, admin, async (req, res) => {
   res.json({ success: true });
 });
 
+router.get("/payments", auth, admin, async (req, res) => {
+  const payments = await Payment.findAll({
+    order: [["createdAt", "DESC"]],
+  });
+  res.json(payments);
+});
+
 module.exports = router;
