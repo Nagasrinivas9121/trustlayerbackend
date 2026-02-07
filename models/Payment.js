@@ -7,23 +7,35 @@ const Payment = sequelize.define(
     paymentId: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,          // Razorpay payment id
+      unique: true, // razorpay_payment_id
     },
     orderId: {
       type: DataTypes.STRING,
-      allowNull: false,      // Razorpay order id
+      allowNull: false, // razorpay_order_id
     },
     amount: {
-      type: DataTypes.INTEGER, // Amount in INR
+      type: DataTypes.INTEGER, // amount in PAISA
       allowNull: false,
+    },
+    currency: {
+      type: DataTypes.STRING,
+      defaultValue: "INR",
     },
     status: {
       type: DataTypes.ENUM("created", "success", "failed"),
       defaultValue: "created",
     },
+    method: {
+      type: DataTypes.STRING, // card / upi / netbanking
+    },
   },
   {
     timestamps: true,
+    indexes: [
+      { fields: ["paymentId"] },
+      { fields: ["orderId"] },
+      { fields: ["status"] },
+    ],
   }
 );
 
