@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../config/db"); // ✅ THIS WAS MISSING
+const sequelize = require("../config/db");
 
 const User = sequelize.define("User", {
   email: {
@@ -18,18 +18,19 @@ const User = sequelize.define("User", {
     defaultValue: "student",
   },
 
-  name: DataTypes.STRING,
   college: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true, // ✅ IMPORTANT
   },
+
   year: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
+
   phone: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
 });
 
