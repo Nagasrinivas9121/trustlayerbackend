@@ -16,12 +16,18 @@ const User = sequelize.define("User", {
     defaultValue: "student",
   },
 
-  name: DataTypes.STRING,
-  college: DataTypes.STRING,
-  course: DataTypes.STRING,
-  year: DataTypes.STRING,
-  phone: DataTypes.STRING,
-  city: DataTypes.STRING,
+  college: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  year: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  phone: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 });
 
 module.exports = User;

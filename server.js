@@ -47,7 +47,7 @@ const PORT = process.env.PORT || 5000;
     await sequelize.authenticate();
     console.log("✅ Database connected");
 
-    // 🔥 THIS IS THE FIX
+    // 🔥 Schema auto-update (development & early production)
     await sequelize.sync({ alter: true });
     console.log("✅ Database schema updated");
 

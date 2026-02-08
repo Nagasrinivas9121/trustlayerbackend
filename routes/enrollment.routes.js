@@ -1,35 +1,35 @@
 const express = require("express");
-const router = express.Router();
 const auth = require("../middleware/auth");
+const { Course, User, Enrollment } = require("../models");
+const { Op } = require("sequelize");
 
-const { Enrollment, Course } = require("../models");
+const router = express.Router();
 
-/**
- * GET /api/enrollments
- * Get logged-in user's enrolled courses
- */
+/* ================= GET ENROLLED COURSES (ACTIVE ONLY) ================= */
 router.get("/", auth, async (req, res) => {
   try {
-    const courses = await req.user.getCourses({
-      through: { attributes: ["progress"] },
+    const now = new Date();
+
+    const courses = await Course.findAll({
+      include: {
+        model: User,
+        where: { id: req.user.id },
+        through: {
+          model: Enrollment,
+          attributes: ["progress", "expiresAt"],
+          where: {
+            expiresAt: {
+              [Op.gt]: now, // 🔐 BLOCK EXPIRED COURSES
+            },
+          },
+        },
+      },
     });
 
     res.json(courses);
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch enrollments" });
-  }
-});
-
-/**
- * POST /api/enrollments/:courseId
- * Enroll user in a course (used after payment later)
- */
-router.post("/:courseId", auth, async (req, res) => {
-  try {
-    await req.user.addCourse(req.params.courseId);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ message: "Enrollment failed" });
+    console.error("Enrollment fetch error:", err);
+    res.status(500).json({ message: "Failed to load enrollments" });
   }
 });
 

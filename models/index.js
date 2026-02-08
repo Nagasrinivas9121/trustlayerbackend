@@ -10,7 +10,7 @@ const Payment = require("./Payment");
 User.belongsToMany(Course, { through: Enrollment });
 Course.belongsToMany(User, { through: Enrollment });
 
-// Explicit relations (VERY IMPORTANT for queries)
+// Explicit relations (REQUIRED for eager loading)
 Enrollment.belongsTo(User);
 Enrollment.belongsTo(Course);
 User.hasMany(Enrollment);
@@ -31,7 +31,7 @@ Payment.belongsTo(User);
 Course.hasMany(Payment);
 Payment.belongsTo(Course);
 
-// Optional: Link payment to enrollment (recommended)
+// One Enrollment → One Payment (recommended)
 Enrollment.hasOne(Payment);
 Payment.belongsTo(Enrollment);
 
