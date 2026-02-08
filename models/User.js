@@ -1,6 +1,3 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/db");
-
 const User = sequelize.define("User", {
   email: {
     type: DataTypes.STRING,
@@ -18,16 +15,14 @@ const User = sequelize.define("User", {
 
   college: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true, // ✅ IMPORTANT
   },
   year: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true, // ✅ IMPORTANT
   },
   phone: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true, // ✅ IMPORTANT
   },
 });
-
-module.exports = User;

@@ -11,7 +11,7 @@ const Enrollment = sequelize.define("Enrollment", {
 
   expiresAt: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true,          // ✅ MUST BE TRUE
   },
 });
 
@@ -19,5 +19,10 @@ const Enrollment = sequelize.define("Enrollment", {
 
 User.belongsToMany(Course, { through: Enrollment });
 Course.belongsToMany(User, { through: Enrollment });
+
+Enrollment.belongsTo(User);
+Enrollment.belongsTo(Course);
+User.hasMany(Enrollment);
+Course.hasMany(Enrollment);
 
 module.exports = Enrollment;
