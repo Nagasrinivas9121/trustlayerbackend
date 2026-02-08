@@ -1,7 +1,5 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
-const User = require("./User");
-const Course = require("./Course");
 
 const Enrollment = sequelize.define("Enrollment", {
   progress: {
@@ -11,18 +9,13 @@ const Enrollment = sequelize.define("Enrollment", {
 
   expiresAt: {
     type: DataTypes.DATE,
-    allowNull: true,          // ✅ MUST BE TRUE
+    allowNull: false,
+    defaultValue: () => {
+      const date = new Date();
+      date.setMonth(date.getMonth() + 6); // ✅ 6 months access
+      return date;
+    },
   },
 });
-
-/* ================= RELATIONS ================= */
-
-User.belongsToMany(Course, { through: Enrollment });
-Course.belongsToMany(User, { through: Enrollment });
-
-Enrollment.belongsTo(User);
-Enrollment.belongsTo(Course);
-User.hasMany(Enrollment);
-Course.hasMany(Enrollment);
 
 module.exports = Enrollment;
