@@ -14,13 +14,22 @@ const router = express.Router();
 router.get("/users", auth, admin, async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ["id", "email", "role", "college", "year", "phone", "createdAt"],
+      attributes: [
+        "id",
+        "email",
+        "role",
+        "college",
+        "year",
+        "phone",
+        "createdAt",
+      ],
       order: [["createdAt", "DESC"]],
     });
-    res.json(users);
+
+    return res.json(users);
   } catch (err) {
     console.error("ADMIN USERS ERROR:", err);
-    res.status(500).json({ message: "Failed to fetch users" });
+    return res.status(500).json({ message: "Failed to fetch users" });
   }
 });
 
@@ -40,10 +49,10 @@ router.put("/users/:id/role", auth, admin, async (req, res) => {
     user.role = role;
     await user.save();
 
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (err) {
     console.error("UPDATE ROLE ERROR:", err);
-    res.status(500).json({ message: "Failed to update role" });
+    return res.status(500).json({ message: "Failed to update role" });
   }
 });
 
@@ -52,20 +61,20 @@ router.put("/users/:id/role", auth, admin, async (req, res) => {
 router.post("/courses", auth, admin, async (req, res) => {
   try {
     const course = await Course.create(req.body);
-    res.status(201).json(course);
+    return res.status(201).json(course);
   } catch (err) {
     console.error("CREATE COURSE ERROR:", err);
-    res.status(500).json({ message: "Failed to create course" });
+    return res.status(500).json({ message: "Failed to create course" });
   }
 });
 
 router.delete("/courses/:id", auth, admin, async (req, res) => {
   try {
     await Course.destroy({ where: { id: req.params.id } });
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (err) {
     console.error("DELETE COURSE ERROR:", err);
-    res.status(500).json({ message: "Failed to delete course" });
+    return res.status(500).json({ message: "Failed to delete course" });
   }
 });
 
@@ -76,10 +85,11 @@ router.get("/services", auth, admin, async (req, res) => {
     const services = await ServiceRequest.findAll({
       order: [["createdAt", "DESC"]],
     });
-    res.json(services);
+
+    return res.json(services);
   } catch (err) {
     console.error("ADMIN SERVICES ERROR:", err);
-    res.status(500).json({ message: "Failed to fetch services" });
+    return res.status(500).json({ message: "Failed to fetch services" });
   }
 });
 
@@ -99,10 +109,10 @@ router.put("/services/:id", auth, admin, async (req, res) => {
     service.status = status;
     await service.save();
 
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (err) {
     console.error("UPDATE SERVICE ERROR:", err);
-    res.status(500).json({ message: "Failed to update service" });
+    return res.status(500).json({ message: "Failed to update service" });
   }
 });
 
@@ -113,10 +123,11 @@ router.get("/payments", auth, admin, async (req, res) => {
     const payments = await Payment.findAll({
       order: [["createdAt", "DESC"]],
     });
-    res.json(payments);
+
+    return res.json(payments);
   } catch (err) {
     console.error("ADMIN PAYMENTS ERROR:", err);
-    res.status(500).json({ message: "Failed to fetch payments" });
+    return res.status(500).json({ message: "Failed to fetch payments" });
   }
 });
 
