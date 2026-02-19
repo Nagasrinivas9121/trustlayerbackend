@@ -16,7 +16,7 @@ router.post("/", auth, async (req, res) => {
     const request = await ServiceRequest.create({
       service,
       description,
-      requesterEmail: req.user.email, // ✅ EMAIL STORED
+      requesterEmail: req.user.email,
       UserId: req.user.id,
     });
 
