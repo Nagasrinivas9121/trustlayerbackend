@@ -7,19 +7,22 @@ if (!process.env.DATABASE_URL) {
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "mysql",
 
-  logging: false, // disable SQL logs (important for speed)
+  logging: false, // ❌ Disable SQL logs (important for performance)
 
   pool: {
-    max: 10,        // max DB connections
+    max: 10,        // Max concurrent DB connections
     min: 0,
     acquire: 30000,
     idle: 10000,
   },
 
+  timezone: "+05:30", // 🇮🇳 IST (optional, remove if not needed)
+
   dialectOptions: {
-    ssl: process.env.NODE_ENV === "production"
-      ? { rejectUnauthorized: false }
-      : false,
+    ssl:
+      process.env.NODE_ENV === "production"
+        ? { rejectUnauthorized: false }
+        : false,
   },
 });
 
