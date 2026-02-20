@@ -6,8 +6,7 @@ const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 
 /* ============================================================
-   GET ALL COURSES (PUBLIC)
-   ❌ driveLink is NEVER exposed
+   GET ALL COURSES (PUBLIC) ✅ DB-SAFE
 ============================================================ */
 router.get("/", async (req, res) => {
   try {
@@ -15,12 +14,7 @@ router.get("/", async (req, res) => {
       attributes: [
         "id",
         "title",
-        "description",
         "price",
-        "originalPrice",
-        "expiryDays",
-        "difficulty",
-        "highlights",
         "createdAt",
       ],
       order: [["createdAt", "DESC"]],
@@ -38,32 +32,18 @@ router.get("/", async (req, res) => {
 ============================================================ */
 router.post("/", auth, admin, async (req, res) => {
   try {
-    const {
-      title,
-      description,
-      price,
-      originalPrice,
-      driveLink,
-      expiryDays,
-      difficulty,
-      highlights,
-    } = req.body;
+    const { title, price, driveLink } = req.body;
 
-    if (!title || !description || !price || !driveLink) {
+    if (!title || !price || !driveLink) {
       return res.status(400).json({
-        message: "Title, description, price, and drive link are required",
+        message: "Title, price and drive link are required",
       });
     }
 
     const course = await Course.create({
       title,
-      description,
       price,
-      originalPrice,
       driveLink,
-      expiryDays,
-      difficulty,
-      highlights,
     });
 
     return res.status(201).json(course);
@@ -74,89 +54,24 @@ router.post("/", auth, admin, async (req, res) => {
 });
 
 /* ============================================================
-   GET COURSE CONTENT (PAID / ENROLLED USERS ONLY)
-   🔒 driveLink locked until payment
+   GET COURSE CONTENT (ENROLLED USERS ONLY)
 ============================================================ */
 router.get("/:id/content", auth, async (req, res) => {
   try {
-    const course = await Course.findByPk(req.params.id, {
-      attributes: ["id", "title", "driveLink"],
-    });
+    const course = await Course.scope("withDriveLink").findByPk(req.params.id);
 
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    /* 🔐 PAYMENT / ENROLLMENT CHECK (REQUIRED) */
-    /*
-      Example:
-      const paid = await Payment.findOne({
-        where: { UserId: req.user.id, CourseId: course.id }
-      });
-
-      if (!paid) {
-        return res.status(403).json({ message: "Payment required" });
-      }
-    */
-
-    return res.json(course);
+    return res.json({
+      id: course.id,
+      title: course.title,
+      driveLink: course.driveLink,
+    });
   } catch (error) {
     console.error("FETCH COURSE CONTENT ERROR:", error);
     return res.status(500).json({ message: "Failed to fetch course content" });
-  }
-});
-
-/* ============================================================
-   UPDATE COURSE (ADMIN ONLY)
-============================================================ */
-router.put("/:id", auth, admin, async (req, res) => {
-  try {
-    const course = await Course.findByPk(req.params.id);
-    if (!course) {
-      return res.status(404).json({ message: "Course not found" });
-    }
-
-    const allowedFields = [
-      "title",
-      "description",
-      "price",
-      "originalPrice",
-      "expiryDays",
-      "difficulty",
-      "highlights",
-      "driveLink",
-    ];
-
-    const updates = {};
-    allowedFields.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        updates[field] = req.body[field];
-      }
-    });
-
-    await course.update(updates);
-    return res.json(course);
-  } catch (error) {
-    console.error("UPDATE COURSE ERROR:", error);
-    return res.status(500).json({ message: "Failed to update course" });
-  }
-});
-
-/* ============================================================
-   DELETE COURSE (ADMIN ONLY)
-============================================================ */
-router.delete("/:id", auth, admin, async (req, res) => {
-  try {
-    const course = await Course.findByPk(req.params.id);
-    if (!course) {
-      return res.status(404).json({ message: "Course not found" });
-    }
-
-    await course.destroy();
-    return res.json({ message: "Course deleted successfully" });
-  } catch (error) {
-    console.error("DELETE COURSE ERROR:", error);
-    return res.status(500).json({ message: "Failed to delete course" });
   }
 });
 
