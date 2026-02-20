@@ -4,16 +4,6 @@ const sequelize = require("../config/db");
 const Enrollment = sequelize.define(
   "Enrollment",
   {
-    UserId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-
-    CourseId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-
     progress: {
       type: DataTypes.INTEGER,
       allowNull: false,

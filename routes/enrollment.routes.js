@@ -1,13 +1,12 @@
 const express = require("express");
 const auth = require("../middleware/auth");
-const { Course, Enrollment } = require("../models");
+const { Enrollment, Course } = require("../models");
 const { Op } = require("sequelize");
 
 const router = express.Router();
 
 /* =====================================================
    GET ENROLLED COURSES (ACTIVE ONLY)
-   🔒 Expired access is blocked
 ===================================================== */
 router.get("/", auth, async (req, res) => {
   try {
@@ -17,7 +16,7 @@ router.get("/", auth, async (req, res) => {
       where: {
         UserId: req.user.id,
         expiresAt: {
-          [Op.gt]: now,
+          [Op.gt]: now, // 🔒 block expired access
         },
       },
       include: [

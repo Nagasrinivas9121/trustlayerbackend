@@ -6,7 +6,7 @@ const Payment = require("./Payment");
 
 /* ================= ENROLLMENTS ================= */
 
-// Many Users ↔ Many Courses
+// Many Users ↔ Many Courses (JOIN TABLE)
 User.belongsToMany(Course, {
   through: Enrollment,
   foreignKey: "UserId",
@@ -19,32 +19,54 @@ Course.belongsToMany(User, {
   otherKey: "UserId",
 });
 
-// Explicit relations
-Enrollment.belongsTo(User, { onDelete: "CASCADE" });
-Enrollment.belongsTo(Course, { onDelete: "CASCADE" });
+/* 🔑 REQUIRED FOR include() TO WORK */
+Enrollment.belongsTo(User, {
+  foreignKey: "UserId",
+  onDelete: "CASCADE",
+});
 
-User.hasMany(Enrollment, { onDelete: "CASCADE" });
-Course.hasMany(Enrollment, { onDelete: "CASCADE" });
+Enrollment.belongsTo(Course, {
+  foreignKey: "CourseId",
+  onDelete: "CASCADE",
+});
+
+User.hasMany(Enrollment, {
+  foreignKey: "UserId",
+  onDelete: "CASCADE",
+});
+
+Course.hasMany(Enrollment, {
+  foreignKey: "CourseId",
+  onDelete: "CASCADE",
+});
 
 /* ================= PAYMENTS ================= */
 
-// User → Payments
-User.hasMany(Payment, { onDelete: "CASCADE" });
-Payment.belongsTo(User);
+User.hasMany(Payment, {
+  foreignKey: "UserId",
+  onDelete: "CASCADE",
+});
+Payment.belongsTo(User, { foreignKey: "UserId" });
 
-// Course → Payments
-Course.hasMany(Payment, { onDelete: "CASCADE" });
-Payment.belongsTo(Course);
+Course.hasMany(Payment, {
+  foreignKey: "CourseId",
+  onDelete: "CASCADE",
+});
+Payment.belongsTo(Course, { foreignKey: "CourseId" });
 
-// Enrollment → Payment (1:1)
-Enrollment.hasOne(Payment, { onDelete: "CASCADE" });
-Payment.belongsTo(Enrollment);
+Enrollment.hasOne(Payment, {
+  foreignKey: "EnrollmentId",
+  onDelete: "CASCADE",
+});
+Payment.belongsTo(Enrollment, { foreignKey: "EnrollmentId" });
 
 /* ================= SERVICE REQUESTS ================= */
 
-// User → Service Requests
-User.hasMany(ServiceRequest, { onDelete: "CASCADE" });
-ServiceRequest.belongsTo(User);
+User.hasMany(ServiceRequest, {
+  foreignKey: "UserId",
+  onDelete: "CASCADE",
+});
+ServiceRequest.belongsTo(User, { foreignKey: "UserId" });
 
 module.exports = {
   User,
