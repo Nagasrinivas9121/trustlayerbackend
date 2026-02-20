@@ -11,13 +11,16 @@ const audit = require("./middleware/audit");
 
 const app = express();
 
-/* ================= REQUIRED FOR RENDER ================= */
+/* =====================================================
+   REQUIRED FOR RENDER / PROXIES
+===================================================== */
 app.set("trust proxy", 1);
 
-/* ================= GLOBAL MIDDLEWARE ================= */
+/* =====================================================
+   GLOBAL SECURITY & PARSING
+===================================================== */
 app.use(helmet());
 
-/* ✅ FINAL CORS CONFIG (FIXED) */
 app.use(
   cors({
     origin: [
@@ -32,18 +35,26 @@ app.use(
 );
 
 app.use(express.json({ limit: "10kb" }));
-app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
+app.use(
+  morgan(process.env.NODE_ENV === "production" ? "combined" : "dev")
+);
 
-/* ================= RATE LIMITING ================= */
+/* =====================================================
+   RATE LIMITING
+===================================================== */
 app.use("/api/", apiLimiter);
 app.use("/api/auth", authLimiter);
 
-/* ================= AUDIT LOGGING ================= */
+/* =====================================================
+   AUDIT LOGGING (SENSITIVE ROUTES)
+===================================================== */
 app.use("/api/admin", audit);
 app.use("/api/services", audit);
 app.use("/api/enrollments", audit);
 
-/* ================= ROUTES ================= */
+/* =====================================================
+   ROUTES
+===================================================== */
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/courses", require("./routes/course.routes"));
 app.use("/api/services", require("./routes/service.routes"));
@@ -51,12 +62,16 @@ app.use("/api/enrollments", require("./routes/enrollment.routes"));
 app.use("/api/admin", require("./routes/admin.routes"));
 app.use("/api/payment", require("./routes/payment.route"));
 
-/* ================= HEALTH CHECK ================= */
+/* =====================================================
+   HEALTH CHECK
+===================================================== */
 app.get("/", (req, res) => {
   res.status(200).send("✅ TrustLayer Labs API running");
 });
 
-/* ================= START SERVER ================= */
+/* =====================================================
+   START SERVER
+===================================================== */
 const PORT = process.env.PORT || 5000;
 
 (async () => {
@@ -72,7 +87,7 @@ const PORT = process.env.PORT || 5000;
       console.log(`🚀 Server running on port ${PORT}`);
     });
   } catch (err) {
-    console.error("❌ Server failed:", err);
+    console.error("❌ Server failed to start:", err);
     process.exit(1);
   }
 })();

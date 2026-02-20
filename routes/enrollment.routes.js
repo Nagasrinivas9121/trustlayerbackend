@@ -7,6 +7,7 @@ const router = express.Router();
 
 /* =====================================================
    GET ENROLLED COURSES (ACTIVE ONLY)
+   ✅ NULL-safe + expiry-safe
 ===================================================== */
 router.get("/", auth, async (req, res) => {
   try {
@@ -15,8 +16,13 @@ router.get("/", auth, async (req, res) => {
     const enrollments = await Enrollment.findAll({
       where: {
         UserId: req.user.id,
+
+        // 🔒 CRITICAL FIX: prevent NULL crash
         expiresAt: {
-          [Op.gt]: now, // 🔒 block expired access
+          [Op.and]: {
+            [Op.ne]: null,   // exclude old/broken rows
+            [Op.gt]: now,    // block expired access
+          },
         },
       },
       include: [
