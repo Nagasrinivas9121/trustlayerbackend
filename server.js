@@ -19,7 +19,10 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "*",
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.env.FRONTEND_URL
+        : "*",
     credentials: true,
   })
 );
@@ -57,13 +60,22 @@ const PORT = process.env.PORT || 5000;
     await sequelize.authenticate();
     console.log("✅ Database connected");
 
-    // ✅ PRODUCTION SAFE — NEVER USE alter:true ON RENDER
+    // 🚫 NEVER use alter:true in production
     await sequelize.sync();
     console.log("✅ Models synced");
 
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
+
+    /* ================= GRACEFUL SHUTDOWN ================= */
+    process.on("SIGTERM", async () => {
+      console.log("🛑 SIGTERM received. Closing server...");
+      server.close();
+      await sequelize.close();
+      process.exit(0);
+    });
+
   } catch (err) {
     console.error("❌ Server failed to start:", err);
     process.exit(1);

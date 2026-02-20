@@ -1,21 +1,27 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
-const Enrollment = sequelize.define("Enrollment", {
-  progress: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
-  },
+const Enrollment = sequelize.define(
+  "Enrollment",
+  {
+    progress: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      validate: {
+        min: 0,
+        max: 100,
+      },
+    },
 
-  expiresAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: () => {
-      const date = new Date();
-      date.setMonth(date.getMonth() + 6); // ✅ 6 months access
-      return date;
+    expiresAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
     },
   },
-});
+  {
+    timestamps: true,
+  }
+);
 
 module.exports = Enrollment;

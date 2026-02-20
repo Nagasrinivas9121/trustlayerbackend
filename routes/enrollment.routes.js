@@ -1,6 +1,6 @@
 const express = require("express");
 const auth = require("../middleware/auth");
-const { Course, User, Enrollment } = require("../models");
+const { Course, Enrollment } = require("../models");
 const { Op } = require("sequelize");
 
 const router = express.Router();
@@ -10,25 +10,35 @@ router.get("/", auth, async (req, res) => {
   try {
     const now = new Date();
 
-    const courses = await Course.findAll({
-      include: {
-        model: User,
-        where: { id: req.user.id },
-        through: {
-          model: Enrollment,
-          attributes: ["progress", "expiresAt"],
-          where: {
-            expiresAt: {
-              [Op.gt]: now, // 🔐 BLOCK EXPIRED COURSES
-            },
-          },
+    const enrollments = await Enrollment.findAll({
+      where: {
+        UserId: req.user.id,
+        expiresAt: {
+          [Op.gt]: now, // 🔐 block expired access
         },
       },
+      include: [
+        {
+          model: Course,
+          attributes: [
+            "id",
+            "title",
+            "description",
+            "price",
+            "originalPrice",
+            "expiryDays",
+            "difficulty",
+            "highlights",
+            "createdAt",
+          ],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
     });
 
-    res.json(courses);
+    res.json(enrollments);
   } catch (err) {
-    console.error("Enrollment fetch error:", err);
+    console.error("ENROLLMENT FETCH ERROR:", err);
     res.status(500).json({ message: "Failed to load enrollments" });
   }
 });
