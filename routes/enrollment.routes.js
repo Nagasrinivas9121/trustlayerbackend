@@ -5,7 +5,10 @@ const { Op } = require("sequelize");
 
 const router = express.Router();
 
-/* ================= GET ENROLLED COURSES (ACTIVE ONLY) ================= */
+/* =====================================================
+   GET ENROLLED COURSES (ACTIVE ONLY)
+   🔒 Expired access is blocked
+===================================================== */
 router.get("/", auth, async (req, res) => {
   try {
     const now = new Date();
@@ -14,7 +17,7 @@ router.get("/", auth, async (req, res) => {
       where: {
         UserId: req.user.id,
         expiresAt: {
-          [Op.gt]: now, // 🔐 block expired access
+          [Op.gt]: now,
         },
       },
       include: [
@@ -36,10 +39,12 @@ router.get("/", auth, async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    res.json(enrollments);
+    return res.json(enrollments);
   } catch (err) {
     console.error("ENROLLMENT FETCH ERROR:", err);
-    res.status(500).json({ message: "Failed to load enrollments" });
+    return res.status(500).json({
+      message: "Failed to load enrollments",
+    });
   }
 });
 
