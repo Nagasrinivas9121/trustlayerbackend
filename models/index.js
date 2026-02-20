@@ -6,28 +6,44 @@ const Payment = require("./Payment");
 
 /* ================= ENROLLMENTS ================= */
 
-User.belongsToMany(Course, { through: Enrollment });
-Course.belongsToMany(User, { through: Enrollment });
+// Many Users ↔ Many Courses
+User.belongsToMany(Course, {
+  through: Enrollment,
+  foreignKey: "UserId",
+  otherKey: "CourseId",
+});
 
-Enrollment.belongsTo(User);
-Enrollment.belongsTo(Course);
-User.hasMany(Enrollment);
-Course.hasMany(Enrollment);
+Course.belongsToMany(User, {
+  through: Enrollment,
+  foreignKey: "CourseId",
+  otherKey: "UserId",
+});
+
+// Explicit relations
+Enrollment.belongsTo(User, { onDelete: "CASCADE" });
+Enrollment.belongsTo(Course, { onDelete: "CASCADE" });
+
+User.hasMany(Enrollment, { onDelete: "CASCADE" });
+Course.hasMany(Enrollment, { onDelete: "CASCADE" });
 
 /* ================= PAYMENTS ================= */
 
-User.hasMany(Payment);
+// User → Payments
+User.hasMany(Payment, { onDelete: "CASCADE" });
 Payment.belongsTo(User);
 
-Course.hasMany(Payment);
+// Course → Payments
+Course.hasMany(Payment, { onDelete: "CASCADE" });
 Payment.belongsTo(Course);
 
-Enrollment.hasOne(Payment);
+// Enrollment → Payment (1:1)
+Enrollment.hasOne(Payment, { onDelete: "CASCADE" });
 Payment.belongsTo(Enrollment);
 
 /* ================= SERVICE REQUESTS ================= */
 
-User.hasMany(ServiceRequest);
+// User → Service Requests
+User.hasMany(ServiceRequest, { onDelete: "CASCADE" });
 ServiceRequest.belongsTo(User);
 
 module.exports = {
