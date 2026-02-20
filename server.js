@@ -11,18 +11,22 @@ const audit = require("./middleware/audit");
 
 const app = express();
 
-/* ================= PROXY (RENDER REQUIRED) ================= */
+/* ================= REQUIRED FOR RENDER ================= */
 app.set("trust proxy", 1);
 
 /* ================= GLOBAL MIDDLEWARE ================= */
 app.use(helmet());
 
+/* ✅ FINAL CORS CONFIG (FIXED) */
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? process.env.FRONTEND_URL
-        : "*",
+    origin: [
+      "https://trustlayerlabs.vercel.app",
+      "http://localhost:5173",
+      "http://localhost:3000",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
@@ -49,7 +53,7 @@ app.use("/api/payment", require("./routes/payment.route"));
 
 /* ================= HEALTH CHECK ================= */
 app.get("/", (req, res) => {
-  res.status(200).send("✅ Trustlayer Labs API running");
+  res.status(200).send("✅ TrustLayer Labs API running");
 });
 
 /* ================= START SERVER ================= */
@@ -60,24 +64,15 @@ const PORT = process.env.PORT || 5000;
     await sequelize.authenticate();
     console.log("✅ Database connected");
 
-    // 🚫 NEVER use alter:true in production
+    // ❗ NEVER use alter:true on Render
     await sequelize.sync();
     console.log("✅ Models synced");
 
-    const server = app.listen(PORT, () => {
+    app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
-
-    /* ================= GRACEFUL SHUTDOWN ================= */
-    process.on("SIGTERM", async () => {
-      console.log("🛑 SIGTERM received. Closing server...");
-      server.close();
-      await sequelize.close();
-      process.exit(0);
-    });
-
   } catch (err) {
-    console.error("❌ Server failed to start:", err);
+    console.error("❌ Server failed:", err);
     process.exit(1);
   }
 })();
