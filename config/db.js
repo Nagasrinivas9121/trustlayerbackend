@@ -7,16 +7,16 @@ if (!process.env.DATABASE_URL) {
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "mysql",
 
-  logging: false, // ❌ Disable SQL logs (important for performance)
+  logging: false, // ✅ good for performance
 
   pool: {
-    max: 10,        // Max concurrent DB connections
+    max: 10,
     min: 0,
     acquire: 30000,
     idle: 10000,
   },
 
-  timezone: "+05:30", // 🇮🇳 IST (optional, remove if not needed)
+  timezone: "+05:30", // optional, safe
 
   dialectOptions: {
     ssl:

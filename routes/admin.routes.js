@@ -57,10 +57,38 @@ router.put("/users/:id/role", auth, admin, async (req, res) => {
 });
 
 /* ================= COURSES ================= */
+/* ✅ FINAL FIX: description + all fields explicitly mapped */
 
 router.post("/courses", auth, admin, async (req, res) => {
   try {
-    const course = await Course.create(req.body);
+    const {
+      title,
+      description,
+      price,
+      originalPrice,
+      driveLink,
+      expiryDays,
+      difficulty,
+      highlights,
+    } = req.body;
+
+    if (!title || !description || !price) {
+      return res.status(400).json({
+        message: "Title, description and price are required",
+      });
+    }
+
+    const course = await Course.create({
+      title,
+      description,
+      price,
+      originalPrice,
+      driveLink,
+      expiryDays,
+      difficulty,
+      highlights,
+    });
+
     return res.status(201).json(course);
   } catch (err) {
     console.error("CREATE COURSE ERROR:", err);
