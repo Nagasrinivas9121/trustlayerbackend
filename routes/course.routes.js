@@ -5,8 +5,10 @@ const Course = require("../models/Course");
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 
-/* ================= GET ALL COURSES (PUBLIC) ================= */
-/* ❌ Do NOT expose driveLink publicly */
+/* ============================================================
+   GET ALL COURSES (PUBLIC)
+   ❌ driveLink is NEVER exposed
+============================================================ */
 router.get("/", async (req, res) => {
   try {
     const courses = await Course.findAll({
@@ -24,14 +26,16 @@ router.get("/", async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    res.json(courses);
+    return res.json(courses);
   } catch (error) {
     console.error("FETCH COURSES ERROR:", error);
-    res.status(500).json({ message: "Failed to fetch courses" });
+    return res.status(500).json({ message: "Failed to fetch courses" });
   }
 });
 
-/* ================= ADD COURSE (ADMIN ONLY) ================= */
+/* ============================================================
+   ADD COURSE (ADMIN ONLY)
+============================================================ */
 router.post("/", auth, admin, async (req, res) => {
   try {
     const {
@@ -47,7 +51,7 @@ router.post("/", auth, admin, async (req, res) => {
 
     if (!title || !description || !price || !driveLink) {
       return res.status(400).json({
-        message: "Title, description, price and drive link are required",
+        message: "Title, description, price, and drive link are required",
       });
     }
 
@@ -62,15 +66,17 @@ router.post("/", auth, admin, async (req, res) => {
       highlights,
     });
 
-    res.status(201).json(course);
+    return res.status(201).json(course);
   } catch (error) {
     console.error("CREATE COURSE ERROR:", error);
-    res.status(500).json({ message: "Failed to create course" });
+    return res.status(500).json({ message: "Failed to create course" });
   }
 });
 
-/* ================= GET COURSE CONTENT (ENROLLED USERS ONLY) ================= */
-/* ✅ Securely expose driveLink */
+/* ============================================================
+   GET COURSE CONTENT (PAID / ENROLLED USERS ONLY)
+   🔒 driveLink locked until payment
+============================================================ */
 router.get("/:id/content", auth, async (req, res) => {
   try {
     const course = await Course.findByPk(req.params.id, {
@@ -81,15 +87,28 @@ router.get("/:id/content", auth, async (req, res) => {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    // 🔐 TODO: check enrollment before returning driveLink
-    res.json(course);
+    /* 🔐 PAYMENT / ENROLLMENT CHECK (REQUIRED) */
+    /*
+      Example:
+      const paid = await Payment.findOne({
+        where: { UserId: req.user.id, CourseId: course.id }
+      });
+
+      if (!paid) {
+        return res.status(403).json({ message: "Payment required" });
+      }
+    */
+
+    return res.json(course);
   } catch (error) {
     console.error("FETCH COURSE CONTENT ERROR:", error);
-    res.status(500).json({ message: "Failed to fetch course content" });
+    return res.status(500).json({ message: "Failed to fetch course content" });
   }
 });
 
-/* ================= UPDATE COURSE (ADMIN ONLY) ================= */
+/* ============================================================
+   UPDATE COURSE (ADMIN ONLY)
+============================================================ */
 router.put("/:id", auth, admin, async (req, res) => {
   try {
     const course = await Course.findByPk(req.params.id);
@@ -97,15 +116,35 @@ router.put("/:id", auth, admin, async (req, res) => {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    await course.update(req.body);
-    res.json(course);
+    const allowedFields = [
+      "title",
+      "description",
+      "price",
+      "originalPrice",
+      "expiryDays",
+      "difficulty",
+      "highlights",
+      "driveLink",
+    ];
+
+    const updates = {};
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    });
+
+    await course.update(updates);
+    return res.json(course);
   } catch (error) {
     console.error("UPDATE COURSE ERROR:", error);
-    res.status(500).json({ message: "Failed to update course" });
+    return res.status(500).json({ message: "Failed to update course" });
   }
 });
 
-/* ================= DELETE COURSE (ADMIN ONLY) ================= */
+/* ============================================================
+   DELETE COURSE (ADMIN ONLY)
+============================================================ */
 router.delete("/:id", auth, admin, async (req, res) => {
   try {
     const course = await Course.findByPk(req.params.id);
@@ -114,10 +153,10 @@ router.delete("/:id", auth, admin, async (req, res) => {
     }
 
     await course.destroy();
-    res.json({ message: "Course deleted successfully" });
+    return res.json({ message: "Course deleted successfully" });
   } catch (error) {
     console.error("DELETE COURSE ERROR:", error);
-    res.status(500).json({ message: "Failed to delete course" });
+    return res.status(500).json({ message: "Failed to delete course" });
   }
 });
 

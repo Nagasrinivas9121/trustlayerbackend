@@ -24,6 +24,7 @@ const Course = sequelize.define(
       allowNull: true,
     },
 
+    // 🔒 Never expose publicly – only via /courses/:id/content
     driveLink: {
       type: DataTypes.TEXT,
       allowNull: false,
@@ -40,12 +41,23 @@ const Course = sequelize.define(
     },
 
     highlights: {
-      type: DataTypes.TEXT, // comma-separated features
+      type: DataTypes.TEXT, // comma-separated or bullet-style features
       allowNull: true,
     },
   },
   {
     timestamps: true,
+
+    // 🔐 Extra safety: hide driveLink unless explicitly requested
+    defaultScope: {
+      attributes: { exclude: ["driveLink"] },
+    },
+
+    scopes: {
+      withDriveLink: {
+        attributes: { include: ["driveLink"] },
+      },
+    },
   }
 );
 
