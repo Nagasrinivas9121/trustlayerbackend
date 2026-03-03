@@ -7,7 +7,7 @@ if (!process.env.DATABASE_URL) {
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "mysql",
 
-  logging: false, // ✅ good for performance
+  logging: false, // ✅ keep false in production
 
   pool: {
     max: 10,
@@ -16,13 +16,18 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
     idle: 10000,
   },
 
-  timezone: "+05:30", // optional, safe
+  timezone: "+05:30", // ✅ safe (IST)
 
   dialectOptions: {
     ssl:
       process.env.NODE_ENV === "production"
-        ? { rejectUnauthorized: false }
+        ? { rejectUnauthorized: false } // ✅ REQUIRED on Render
         : false,
+  },
+
+  // ✅ Optional (not required, but safe)
+  define: {
+    freezeTableName: false,
   },
 });
 
