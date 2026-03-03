@@ -17,14 +17,15 @@ router.get("/", auth, async (req, res) => {
       where: {
         UserId: req.user.id,
 
-        // 🔒 CRITICAL FIX: prevent NULL crash
+        // ✅ Prevent NULL crash + block expired access
         expiresAt: {
-          [Op.and]: {
-            [Op.ne]: null,   // exclude old/broken rows
-            [Op.gt]: now,    // block expired access
-          },
+          [Op.and]: [
+            { [Op.ne]: null }, // ignore broken old rows
+            { [Op.gt]: now },  // only active enrollments
+          ],
         },
       },
+
       include: [
         {
           model: Course,
@@ -41,6 +42,7 @@ router.get("/", auth, async (req, res) => {
           ],
         },
       ],
+
       order: [["createdAt", "DESC"]],
     });
 

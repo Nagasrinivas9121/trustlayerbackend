@@ -4,6 +4,16 @@ const sequelize = require("../config/db");
 const Enrollment = sequelize.define(
   "Enrollment",
   {
+    UserId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
+    CourseId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
     progress: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -14,13 +24,18 @@ const Enrollment = sequelize.define(
       },
     },
 
+    // ✅ NULL-safe to prevent 500 errors
     expiresAt: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
     },
   },
   {
     timestamps: true,
+    indexes: [
+      { fields: ["UserId"] },
+      { fields: ["CourseId"] },
+    ],
   }
 );
 
