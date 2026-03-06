@@ -25,6 +25,8 @@ app.use(
   cors({
     origin: [
       "https://trustlayerlabs.vercel.app",
+      "https://www.trustlayerlabs.co.in",
+      "https://trustlayerlabs.co.in",
       "http://localhost:5173",
       "http://localhost:3000",
     ],
