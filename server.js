@@ -6,90 +6,104 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 
 const sequelize = require("./config/db");
-const { apiLimiter, authLimiter } = require("./middleware/rateLimit");
+
+const { apiLimiter } = require("./middleware/rateLimit");
 const audit = require("./middleware/audit");
 
 const app = express();
 
-/* =====================================================
-   REQUIRED FOR RENDER / PROXIES
-===================================================== */
+/* ==========================================
+   TRUST PROXY (Render / Vercel compatibility)
+========================================== */
 app.set("trust proxy", 1);
 
-/* =====================================================
-   GLOBAL SECURITY & PARSING
-===================================================== */
+/* ==========================================
+   SECURITY
+========================================== */
+
 app.use(helmet());
 
 app.use(
   cors({
     origin: [
       "https://trustlayerlabs.vercel.app",
-      "https://www.trustlayerlabs.co.in",
       "https://trustlayerlabs.co.in",
-      "http://localhost:5173",
-      "http://localhost:3000",
+      "https://www.trustlayerlabs.co.in",
+      "http://localhost:5173"
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+    credentials: true
   })
 );
 
+/* ==========================================
+   PARSING
+========================================== */
+
 app.use(express.json({ limit: "10kb" }));
+
 app.use(
   morgan(process.env.NODE_ENV === "production" ? "combined" : "dev")
 );
 
-/* =====================================================
-   RATE LIMITING
-===================================================== */
+/* ==========================================
+   RATE LIMIT
+========================================== */
+
 app.use("/api/", apiLimiter);
-app.use("/api/auth", authLimiter);
 
-/* =====================================================
-   AUDIT LOGGING (SENSITIVE ROUTES)
-===================================================== */
-app.use("/api/admin", audit);
+/* ==========================================
+   AUDIT LOG (optional)
+========================================== */
+
 app.use("/api/services", audit);
-app.use("/api/enrollments", audit);
+app.use("/api/contact", audit);
 
-/* =====================================================
+/* ==========================================
    ROUTES
-===================================================== */
-app.use("/api/auth", require("./routes/auth.routes"));
-app.use("/api/courses", require("./routes/course.routes"));
-app.use("/api/services", require("./routes/service.routes"));
-app.use("/api/enrollments", require("./routes/enrollment.routes"));
-app.use("/api/admin", require("./routes/admin.routes"));
-app.use("/api/payment", require("./routes/payment.route"));
+========================================== */
 
-/* =====================================================
+app.use("/api/services", require("./routes/service.routes"));
+app.use("/api/contact", require("./routes/contact.routes"));
+
+/* ==========================================
    HEALTH CHECK
-===================================================== */
+========================================== */
+
 app.get("/", (req, res) => {
-  res.status(200).send("✅ TrustLayer Labs API running");
+  res.status(200).send("TrustLayerLabs API running");
 });
 
-/* =====================================================
+/* ==========================================
    START SERVER
-===================================================== */
+========================================== */
+
 const PORT = process.env.PORT || 5000;
 
 (async () => {
   try {
-    await sequelize.authenticate();
-    console.log("✅ Database connected");
 
-    // ❗ NEVER use alter:true on Render
+    await sequelize.authenticate();
+
+    console.log("Database connected");
+
+
     await sequelize.sync();
-    console.log("✅ Models synced");
+
+    console.log("Models synced");
+
 
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+
+      console.log(`Server running on ${PORT}`);
+
     });
+
   } catch (err) {
-    console.error("❌ Server failed to start:", err);
-    process.exit(1);
+
+    console.error(err);
+
   }
+
 })();
