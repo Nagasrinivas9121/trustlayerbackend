@@ -1,28 +1,41 @@
-import express from "express";
-
-import Contact from "../models/Contact.js";
+const express = require("express");
 
 const router = express.Router();
 
-
 router.post("/", async (req, res) => {
+  try {
 
- try {
+    const { name, email, company, service, message } = req.body;
 
-   const contact = new Contact(req.body);
+    if (!email || !message) {
 
-   await contact.save();
+      return res.status(400).json({
+        message: "Email and message required"
+      });
 
-   res.json({ success: true });
+    }
 
- }
+    console.log({
+      name,
+      email,
+      company,
+      service,
+      message
+    });
 
- catch {
+    return res.status(200).json({
+      message: "Request received"
+    });
 
-   res.status(500).json({ error: true });
+  } catch (err) {
 
- }
+    console.error(err);
 
+    return res.status(500).json({
+      message: "Server error"
+    });
+
+  }
 });
 
-export default router;
+module.exports = router;
