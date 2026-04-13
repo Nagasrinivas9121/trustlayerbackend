@@ -13,8 +13,17 @@ const audit = require("./middleware/audit");
 const app = express();
 
 /* ==========================================
-   TRUST PROXY (Render / Vercel compatibility)
+   LOAD MODELS (IMPORTANT)
 ========================================== */
+
+require("./models/Contact");
+require("./models/ServiceRequest");
+require("./models/AuditLog");
+
+/* ==========================================
+   TRUST PROXY
+========================================== */
+
 app.set("trust proxy", 1);
 
 /* ==========================================
@@ -38,7 +47,7 @@ app.use(
 );
 
 /* ==========================================
-   PARSING
+   BODY PARSER
 ========================================== */
 
 app.use(express.json({ limit: "10kb" }));
@@ -54,7 +63,7 @@ app.use(
 app.use("/api/", apiLimiter);
 
 /* ==========================================
-   AUDIT LOG (optional)
+   AUDIT LOG
 ========================================== */
 
 app.use("/api/services", audit);
@@ -82,17 +91,16 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 (async () => {
+
   try {
 
     await sequelize.authenticate();
 
     console.log("Database connected");
 
-
     await sequelize.sync();
 
-    console.log("Models synced");
-
+    console.log("Tables created");
 
     app.listen(PORT, () => {
 
