@@ -1,41 +1,63 @@
 const express = require("express");
 
+const Contact = require("../models/Contact");
+
 const router = express.Router();
 
-router.post("/", async (req, res) => {
-  try {
 
-    const { name, email, company, service, message } = req.body;
+/* CREATE CONTACT LEAD */
 
-    if (!email || !message) {
+router.post("/", async (req,res)=>{
 
-      return res.status(400).json({
-        message: "Email and message required"
-      });
+try{
 
-    }
+const { name, email, company, service, message } = req.body;
 
-    console.log({
-      name,
-      email,
-      company,
-      service,
-      message
-    });
+if(!email || !message){
 
-    return res.status(200).json({
-      message: "Request received"
-    });
+return res.status(400).json({
 
-  } catch (err) {
+message:"Email and message required"
 
-    console.error(err);
-
-    return res.status(500).json({
-      message: "Server error"
-    });
-
-  }
 });
+
+}
+
+const contact = await Contact.create({
+
+name,
+
+email,
+
+company,
+
+service,
+
+message
+
+});
+
+return res.status(201).json({
+
+message:"Contact stored",
+
+contact
+
+});
+
+}catch(err){
+
+console.error("CONTACT ERROR:",err);
+
+return res.status(500).json({
+
+message:"Server error"
+
+});
+
+}
+
+});
+
 
 module.exports = router;

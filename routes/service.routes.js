@@ -4,68 +4,57 @@ const router = express.Router();
 
 const ServiceRequest = require("../models/ServiceRequest");
 
+
 /*
  CLIENT SUBMITS SERVICE REQUEST
- No login required
+ Public route (no login required)
 */
 
-router.post("/", async (req, res) => {
+router.post("/", async (req,res)=>{
 
- try {
+try{
 
-   const {
+const { service, email, message } = req.body;
 
-     service,
+if(!service || !email || !message){
 
-     email,
+return res.status(400).json({
 
-     message
+message:"Missing required fields"
 
-   } = req.body;
+});
 
+}
 
-   if (!service || !email || !message) {
+const request = await ServiceRequest.create({
 
-     return res.status(400).json({
+service,
 
-       message: "Missing required fields"
+requesterEmail:email,
 
-     });
+description:message
 
-   }
+});
 
+return res.status(201).json({
 
-   const request = await ServiceRequest.create({
+success:true,
 
-     service,
+request
 
-     requesterEmail: email,
+});
 
-     description: message
+}catch(err){
 
-   });
+console.error("SERVICE REQUEST ERROR:",err);
 
+return res.status(500).json({
 
-   return res.status(201).json({
+message:"Server error"
 
-     success: true
+});
 
-   });
-
-
- }
-
- catch (err) {
-
-   console.error(err);
-
-   return res.status(500).json({
-
-     message: "Server error"
-
-   });
-
- }
+}
 
 });
 

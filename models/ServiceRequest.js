@@ -2,34 +2,36 @@ const { DataTypes } = require("sequelize");
 
 const sequelize = require("../config/db");
 
-
 const ServiceRequest = sequelize.define("ServiceRequest", {
 
- service: {
+service: {
 
-   type: DataTypes.STRING,
+type: DataTypes.STRING,
 
-   allowNull: false
+allowNull: false
 
- },
+},
 
- requesterEmail: {
+requesterEmail: {
 
-   type: DataTypes.STRING,
+type: DataTypes.STRING,
 
-   allowNull: false
+allowNull: false
 
- },
+},
 
- description: {
+description: {
 
-   type: DataTypes.TEXT,
+type: DataTypes.TEXT,
 
-   allowNull: false
+allowNull: false
 
- }
+}
+
+},{
+
+timestamps:true
 
 });
-
 
 module.exports = ServiceRequest;
