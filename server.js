@@ -24,9 +24,14 @@ app.use(express.urlencoded({ extended: false }));
 // 2. CORS Configuration
 app.use(
   cors({
-    origin: "*", // Allow all origins for testing
+    origin: [
+      "https://www.trustlayerlabs.co.in",
+      "https://trustlayerlabs.vercel.app",
+      "http://localhost:5173"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
 
@@ -44,12 +49,20 @@ app.use("/api/", apiLimiter);
 
 // Root Route to confirm API is running and fix "Not Found /" error
 app.get("/", (req, res) => {
-  res.send("TrustLayer Labs backend running");
+  res.send("TrustLayer Labs API running");
+});
+
+// Favicon handler to prevent browser console error
+app.get("/favicon.ico", (req, res) => {
+  res.status(204).end();
 });
 
 // Health Check Endpoint
 app.get("/api/health", (req, res) => {
-  res.status(200).json({ status: "OK" });
+  res.json({
+    status: "OK",
+    service: "TrustLayer Labs API"
+  });
 });
 
 // Form Endpoints
