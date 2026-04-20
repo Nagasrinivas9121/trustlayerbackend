@@ -22,18 +22,9 @@ app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: false }));
 
 // 2. CORS Configuration
-app.use(
-  cors({
-    origin: [
-      "https://www.trustlayerlabs.co.in",
-      "https://trustlayerlabs.vercel.app",
-      "http://localhost:5173"
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: "*"
+}));
 
 // Rate Limiting
 const apiLimiter = rateLimit({
