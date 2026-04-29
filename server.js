@@ -59,6 +59,7 @@ app.get("/api/health", (req, res) => {
 // Form Endpoints
 app.use("/api/contact", require("./routes/contactRoutes"));
 app.use("/api/quote", require("./routes/quoteRoutes"));
+app.use("/api/scan", require("./routes/scanRoutes"));
 
 // 4. Error Handling Middleware
 app.use(notFound);
